@@ -1,0 +1,114 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// role user
+
+enum Role {
+  ADMIN
+  OPERATOR
+  VIEWER
+}
+
+// status user
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+// device status
+enum DeviceStatus {
+  ONLINE
+  OFFLINE
+  MAINTENANCE
+  WARNING
+}
+
+enum DeviceType {
+  ANDROID
+  IOS
+  GATEWAY
+}
+
+enum CaptureSource {
+  LIVE
+  IMPORT
+}
+
+
+
+model User {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  email     String     @unique
+  name      String
+  password  String 
+  role      Role       @default(OPERATOR)
+  status    UserStatus @default(ACTIVE)
+  lastLogin DateTime?
+  lastActive DateTime?
+  devices   Device[]  
+  // campaigns Campaign[] // Seorang user bisa membuat banyak campaign
+// imsiCaptures IMSICapture[] // Relasi ke data IMSI yang di-capture/impor
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+model Device {
+  id              String       @id @default(auto()) @map("_id") @db.ObjectId
+  name            String
+  osVersion       String?
+  type            DeviceType  
+  location        String?
+  whatsappNumber  String?      @unique
+  status          DeviceStatus @default(OFFLINE)
+  batteryLevel    Int?         @default(100)
+  storageUsage    Int?         @default(0)
+  cpuUsage        Int?         @default(0)
+  memoryUsage     Int?         @default(0)
+  lastSeen        DateTime?
+
+  user            User         @relation(fields: [userId], references: [id])
+  userId          String       @db.ObjectId
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}
+
+
+model IMSICapture {
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  imsi        String
+  imei        String
+  msisdn      String?
+  timestamp   DateTime
+  location    String
+  signalDBM   Int
+  operator    String
+  source      CaptureSource @default(LIVE)
+  networkType  String?
+  // Relasi
+
+  createdAt   DateTime      @default(now())
+
+  // Mencegah duplikasi data
+  @@unique([imsi, timestamp])
+  // query berdasarkan user
+  // @@index([userId])
+}
+
+
+

@@ -75,7 +75,7 @@ export async function importIMSIFromFile(filePath: string, fileType: string, use
     jsonData.forEach((row: any) => records.push({
         imsi: String(row.IMSI), 
         imei: String(row.IMEI || 'N/A'), 
-        msisdn: String(row.MSISDN),
+        msisdn: row.MSISDN ? String(row.MSISDN) : null,
         timestamp: new Date(row['Collection Time']), 
         location: row['Location Name'],
         signalDBM: parseInt(row.SignalDBM || '0'), 
@@ -89,6 +89,7 @@ export async function importIMSIFromFile(filePath: string, fileType: string, use
   fs.unlinkSync(filePath); // Clean up uploaded file
 
   if (records.length === 0) return 0;
+
 
   const result = await prisma.iMSICapture.createMany({
     data: records,

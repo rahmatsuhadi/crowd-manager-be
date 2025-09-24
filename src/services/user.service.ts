@@ -109,9 +109,8 @@ export async function getAllUsers(query: { page: number; limit: number; search?:
   const fiveMinutesInMs = 5 * 60 * 1000;
   const now = new Date();
 
-  // Tambahkan field 'activeStatus' secara dinamis ke setiap user
   const userresult = users.map(user => {
-    let activeStatus = 'Inctive'; // Default status adalah Offline
+    let activeStatus = 'Inctive'; // Default status adalah Inctive
 
     // Jika user pernah aktif dan waktu terakhir aktifnya kurang dari 5 menit yang lalu
     if (user.lastActive && (now.getTime() - user.lastActive.getTime()) < fiveMinutesInMs) {

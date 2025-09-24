@@ -33,10 +33,7 @@ export async function getAllDevicesController(
 
     const result = await deviceService.getAllDevices({ page, limit, search }, userId);
 
-    res.status(200).json({
-      status: 'success',
-      ...result,
-    });
+    res.status(200).json(result);
   } catch (error) {
     next(error);
   }

@@ -3,6 +3,7 @@ import * as authService from '../services/auth.service';
 import { LoginUserInput, RegisterUserInput } from '../schemas/auth.schema';
 import { CreateUserInput } from '../schemas/user.schema';
 import * as userService from '../services/user.service';
+import { Prisma } from '@prisma/client';
 
 export async function loginController(
     req: Request<{}, {}, LoginUserInput>,
@@ -11,14 +12,14 @@ export async function loginController(
 ) {
     try {
         const token = await authService.loginUser(req.body);
-    
+
         res.status(200).json({
             status: 'success',
             token,
         });
     } catch (error: any) {
         if (error.message.includes('Invalid email or password')) {
-            return res.status(401).json({ status: 'fail', message: error.message });
+            return res.status(401).json({ status: 'error', message: error.message });
         }
         next(error);
     }
@@ -40,9 +41,8 @@ export async function registerController(
             status: 'success',
             data: { user },
         });
-    } catch (error: any) {
-        // Handle unique constraint error specifically
-        if (error.message.includes('already in use')) {
+    } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
             return res.status(409).json({ status: 'fail', message: error.message });
         }
         next(error);

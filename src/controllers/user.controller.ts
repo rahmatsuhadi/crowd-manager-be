@@ -16,10 +16,7 @@ export async function createUserController(
     });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      return res.status(409).json({ status: 'fail', message: error.message });
-    }
-    else if (error instanceof Error) {
-      return res.status(409).json({ status: 'fail', message: error.message });
+      return res.status(409).json({ status: 'error', message: error.message });
     }
     next(error);
   }
@@ -32,7 +29,6 @@ export async function getAllUsersController(
   next: NextFunction
 ) {
   try {
-    // Mengambil dan mem-parsing query params
     const page = parseInt(req.query.page || '1');
     const limit = parseInt(req.query.limit || '10');
     const search = req.query.search;
@@ -49,12 +45,9 @@ export async function getUserByIdController(req: Request, res: Response, next: N
   try {
     const user = await userService.getUserById(req.params.id);
     if (!user) {
-      return res.status(404).json({ status: 'fail', message: 'User not found' });
+      return res.status(404).json({ status: 'error', message: 'User not found' });
     }
-    res.status(200).json({
-      status: 'success',
-      data: { user },
-    });
+    res.status(200).json(user);
   } catch (error) {
     next(error);
   }
@@ -71,7 +64,7 @@ export async function updateUserController(
     const isOwn = currentUser.id == req.params.id
 
     if (!!isOwn && !!req.body.role) {
-      res.status(403).json({ message: "Request Not Allowed" });
+      res.status(403).json({ status: "error", message: "Request Not Allowed" });
       throw new Error();
     }
 

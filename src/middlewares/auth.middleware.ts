@@ -51,12 +51,12 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
     if (error instanceof JsonWebTokenError) {
       if (error.name === 'TokenExpiredError') {
         return res.status(401).json({
-          status: 'fail',
+          status: 'error',
           message: 'Your token has expired. Please log in again.',
         });
       }
       return res.status(401).json({
-        status: 'fail',
+        status: 'error',
         message: 'Invalid token.',
       });
     }
